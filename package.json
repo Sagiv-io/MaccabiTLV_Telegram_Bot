@@ -1,0 +1,22 @@
+{
+  "name": "maccabi-news-bot",
+  "version": "1.0.0",
+  "description": "Maccabi Tel Aviv Basketball News Monitor",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc --skipLibCheck",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.21.0",
+    "dotenv": "^16.4.7",
+    "playwright": "^1.49.1",
+    "telegraf": "^4.16.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.19.13",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.2"
+  }
+}
