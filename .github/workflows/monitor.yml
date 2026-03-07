@@ -14,6 +14,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Restore last run timestamp
+        uses: actions/cache/restore@v4
+        with:
+          path: last-run.txt
+          key: last-run-timestamp
+          restore-keys: last-run-timestamp
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -35,3 +42,9 @@ jobs:
           TELEGRAM_CHANNEL_ID: ${{ secrets.TELEGRAM_CHANNEL_ID }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: npm start
+
+      - name: Save last run timestamp
+        uses: actions/cache/save@v4
+        with:
+          path: last-run.txt
+          key: last-run-timestamp-${{ github.run_id }}
