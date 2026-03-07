@@ -9,6 +9,7 @@ export interface ScrapedArticle {
 
 const TARGET_URLS = [
     'https://www.sport5.co.il/team.aspx?FolderID=2592',
+    'https://www.sport5.co.il/world.aspx?FolderId=4467',
     'https://www.one.co.il/Basketball/team/1219',
     'https://sports.walla.co.il/team/869',
     'https://www.israelhayom.co.il/tag/%D7%9E%D7%9B%D7%91%D7%99-%D7%AA%D7%9C-%D7%90%D7%91%D7%99%D7%91-%D7%91%D7%9B%D7%93%D7%95%D7%A8%D7%A1%D7%9C',
