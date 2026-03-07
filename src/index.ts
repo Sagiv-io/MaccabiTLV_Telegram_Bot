@@ -2,7 +2,7 @@ import { scrapeLatestArticles } from './scraper';
 import { summarizeArticle } from './gemini';
 import { sendTelegramMessage } from './telegram';
 
-const INTERVAL_MINUTES = 15;
+const INTERVAL_MINUTES = 60;
 
 async function main() {
     const now = new Date();
