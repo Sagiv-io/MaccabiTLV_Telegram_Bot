@@ -63,8 +63,9 @@ export async function scrapeLatestArticles(): Promise<ScrapedArticle[]> {
                 for (const link of articleLinks) {
                     try {
                         const newPage = await context.newPage();
-                        // Increase timeout for sites like ONE
-                        await newPage.goto(link.href, { waitUntil: 'domcontentloaded', timeout: 45000 });
+                        await newPage.goto(link.href, { waitUntil: 'load', timeout: 45000 });
+                        // Wait for JS-rendered content (e.g. Israel Hayom renders <time> via React)
+                        await newPage.waitForTimeout(2000);
 
                         // Extract article content and try to find publish date
                         const articleData = await newPage.evaluate(() => {
@@ -110,9 +111,38 @@ export async function scrapeLatestArticles(): Promise<ScrapedArticle[]> {
                             }
 
                             if (!publishDate) {
-                                const timeEl = document.querySelector('time[datetime]');
-                                if (timeEl) {
-                                    publishDate = timeEl.getAttribute('datetime');
+                                // Try article-specific time selectors first (avoids header clocks)
+                                const articleTimeSelectors = [
+                                    '.single-post-meta-dates time[datetime]',  // Israel Hayom
+                                    '.article-date-author time[datetime]',     // Sport5
+                                    'article time[datetime]',                  // Generic article wrapper
+                                    '.article-header time[datetime]',
+                                    '.post-meta time[datetime]',
+                                ];
+
+                                for (const sel of articleTimeSelectors) {
+                                    const el = document.querySelector(sel);
+                                    if (el) {
+                                        publishDate = el.getAttribute('datetime');
+                                        if (publishDate) break;
+                                    }
+                                }
+
+                                // Fallback: generic time[datetime], but skip if it's within 5 min of now (likely a clock)
+                                if (!publishDate) {
+                                    const timeEls = Array.from(document.querySelectorAll('time[datetime]'));
+                                    for (const el of timeEls) {
+                                        const dt = el.getAttribute('datetime');
+                                        if (dt) {
+                                            const parsed = new Date(dt);
+                                            const diffMs = Math.abs(Date.now() - parsed.getTime());
+                                            // Skip if within 5 minutes of current time (likely a live clock)
+                                            if (diffMs > 5 * 60 * 1000) {
+                                                publishDate = dt;
+                                                break;
+                                            }
+                                        }
+                                    }
                                 }
                             }
 
