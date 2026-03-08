@@ -115,6 +115,7 @@ export async function scrapeLatestArticles(): Promise<ScrapedArticle[]> {
                                 const articleTimeSelectors = [
                                     '.single-post-meta-dates time[datetime]',  // Israel Hayom
                                     '.article-date-author time[datetime]',     // Sport5
+                                    'time[itemprop*="datePublished"]',         // ONE (and other schema.org sites)
                                     'article time[datetime]',                  // Generic article wrapper
                                     '.article-header time[datetime]',
                                     '.post-meta time[datetime]',
@@ -123,7 +124,16 @@ export async function scrapeLatestArticles(): Promise<ScrapedArticle[]> {
                                 for (const sel of articleTimeSelectors) {
                                     const el = document.querySelector(sel);
                                     if (el) {
-                                        publishDate = el.getAttribute('datetime');
+                                        let dt = el.getAttribute('datetime') || '';
+                                        // If datetime has only date (no T), try to get time from text content
+                                        // e.g. ONE: datetime="2026-03-07" but text="07/03/2026 15:38"
+                                        if (dt && !dt.includes('T')) {
+                                            const textTime = el.textContent?.match(/(\d{2}:\d{2})/);
+                                            if (textTime) {
+                                                dt = `${dt}T${textTime[1]}:00Z`;
+                                            }
+                                        }
+                                        publishDate = dt || null;
                                         if (publishDate) break;
                                     }
                                 }
