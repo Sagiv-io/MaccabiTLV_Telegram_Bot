@@ -44,7 +44,7 @@ export async function scrapeLatestArticles(): Promise<ScrapedArticle[]> {
                             text = link.textContent?.trim() || link.getAttribute('aria-label') || link.getAttribute('title') || '';
                         }
 
-                        if (href && href.startsWith('http') && !href.includes('tag') && !href.includes('author') && !href.includes('category')) {
+                        if (href && href.startsWith('http') && !href.includes('tag') && !href.includes('author') && !href.includes('category') && !href.includes('vod.sport5.co.il')) {
                             // Only include if text looks like a valid title with keywords or if it's Israel Hayom
                             // Israel Hayom links sometimes just have an ID or specific structure without "maccabi" in text
                             if (text.length > 15 &&
