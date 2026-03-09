@@ -61,7 +61,7 @@ export async function scrapeLatestArticles(): Promise<ScrapedArticle[]> {
                 for (const link of articleLinks) {
                     try {
                         const newPage = await context.newPage();
-                        await newPage.goto(link.href, { waitUntil: 'load', timeout: 45000 });
+                        await newPage.goto(link.href, { waitUntil: 'domcontentloaded', timeout: 45000 });
                         // Wait for JS-rendered content (e.g. Israel Hayom renders <time> via React)
                         await newPage.waitForTimeout(5000);
 
