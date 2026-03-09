@@ -12,8 +12,6 @@ const TARGET_URLS = [
     'https://www.sport5.co.il/world.aspx?FolderId=4467',
     'https://www.one.co.il/Basketball/team/1219',
     'https://sports.walla.co.il/team/869',
-    'https://www.israelhayom.co.il/tag/%D7%9E%D7%9B%D7%91%D7%99-%D7%AA%D7%9C-%D7%90%D7%91%D7%99%D7%91-%D7%91%D7%9B%D7%93%D7%95%D7%A8%D7%A1%D7%9C',
-    'https://www.ynet.co.il/topics/%D7%9E%D7%9B%D7%91%D7%99_%D7%AA%D7%9C_%D7%90%D7%91%D7%99%D7%91_%D7%91%D7%9B%D7%93%D7%95%D7%A8%D7%A1%D7%9C'
 ];
 
 export async function scrapeLatestArticles(): Promise<ScrapedArticle[]> {
@@ -65,7 +63,7 @@ export async function scrapeLatestArticles(): Promise<ScrapedArticle[]> {
                         const newPage = await context.newPage();
                         await newPage.goto(link.href, { waitUntil: 'load', timeout: 45000 });
                         // Wait for JS-rendered content (e.g. Israel Hayom renders <time> via React)
-                        await newPage.waitForTimeout(2000);
+                        await newPage.waitForTimeout(5000);
 
                         // Extract article content and try to find publish date
                         const articleData = await newPage.evaluate(() => {
