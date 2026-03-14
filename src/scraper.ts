@@ -27,7 +27,19 @@ export async function scrapeLatestArticles(): Promise<ScrapedArticle[]> {
         for (const url of TARGET_URLS) {
             try {
                 console.log(`Navigating to ${url}...`);
-                await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
+
+                // Try to load the page, with one retry on timeout
+                try {
+                    await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
+                } catch (navError: any) {
+                    if (navError?.name === 'TimeoutError') {
+                        console.warn(`⚠️ Timeout on ${url}, retrying in 5s with extended timeout...`);
+                        await new Promise(resolve => setTimeout(resolve, 5000));
+                        await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 45000 });
+                    } else {
+                        throw navError;
+                    }
+                }
 
                 // Generic logic: find the first 2-3 links that look like articles
                 const articleLinks = await page.evaluate((url) => {
