@@ -79,13 +79,36 @@ export async function scrapeLatestArticles(): Promise<ScrapedArticle[]> {
 
                         // Extract article content and try to find publish date
                         const articleData = await newPage.evaluate(() => {
-                            // Extract paragraphs
-                            const paragraphs = Array.from(document.querySelectorAll('p'));
-                            const content = paragraphs
-                                .map(p => p.innerText.trim())
-                                .filter(text => text.length > 30)
+                            // Extract content, avoiding cookie banners and non-article text
+                            const articleContainer = document.querySelector('.article-content') ||
+                                              document.querySelector('.text-content') ||
+                                              document.querySelector('article') ||
+                                              document.querySelector('.article-body') ||
+                                              document.querySelector('.post-content') ||
+                                              document.body;
+
+                            const textElements = Array.from(articleContainer.querySelectorAll('p, .text_content, div.text')) as HTMLElement[];
+                            
+                            let content = textElements
+                                .filter((el: HTMLElement) => {
+                                    // Exclude termsfeed/cookie modals and footers/headers
+                                    if (el.closest && el.closest('[id*="termsfeed"], [class*="termsfeed"], [id*="cookie"], [class*="cookie"], footer, header')) return false;
+                                    return el.innerText && el.innerText.trim().length > 30;
+                                })
+                                .map((el: HTMLElement) => el.innerText.trim())
                                 .slice(0, 5)
                                 .join('\n');
+
+                            // Fallback if no specific tags found (common in Israel sports sites using raw text or generic divs)
+                            if (!content && articleContainer !== document.body) {
+                                const rawText = (articleContainer as HTMLElement).innerText || '';
+                                content = rawText.split('\n')
+                                    .map((t: string) => t.trim())
+                                    .filter((t: string) => t.length > 30 && !t.includes('termsfeed') && !t.includes('cookie'))
+                                    .slice(0, 5)
+                                    .join('\n');
+                            }
+
 
                             // Try to extract publish date from common meta tags and elements
                             let publishDate: string | null = null;
